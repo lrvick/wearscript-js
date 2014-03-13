@@ -21,14 +21,12 @@ function WearScriptConnection(ws, group, device, onopen) {
     }
 
     this.onopen = function (event) {
-        console.log("wsclient: onopen");
         this.publish('subscriptions', this.groupDevice, this._keys(this._channelsInternal));
         this._onopen(event);
     }
 
     this.receive = function (event) {
 	a = event;
-	console.log('here:' + event)
         var reader = new FileReader();
         reader.addEventListener("loadend", function () {
             var data = msgpack.unpack(reader.result);
@@ -109,11 +107,9 @@ function WearScriptConnection(ws, group, device, onopen) {
     }
 
     this.publish = function () {
-        console.log(arguments[0]);
 	if (!this.exists(arguments[0]) || this.ws.readyState != 1) {
 	    return this;
 	}
-        console.log('Sending:' + arguments[0]);
 	this.send.apply(this, arguments);
 	return this;
     }
@@ -132,14 +128,11 @@ function WearScriptConnection(ws, group, device, onopen) {
         var args = Array.prototype.slice.call(arguments).slice(3);
 	if (this._channelsInternal.hasOwnProperty(channel))
             return;
-        console.log('pub_ret');
         if (retryTime < 200)
             retryTime = 200;
         var inner = function () {
-            console.log('pub_ret0a');
 	    if (!this._channelsInternal.hasOwnProperty(channel))
                 return;
-            console.log('pub_ret0b');
 	    this.publish.apply(this, args);
             retryTime *= 2;
             if (retryTime > 30000)
@@ -147,8 +140,6 @@ function WearScriptConnection(ws, group, device, onopen) {
             window.setTimeout(inner, retryTime);
         }.bind(this);
         var listener = function () {
-            console.log('pub_ret1');
-            console.log('listener: result');
             this.unsubscribe(channel);
             callback.apply(null, Array.prototype.slice.call(arguments));
         }.bind(this);
@@ -159,8 +150,6 @@ function WearScriptConnection(ws, group, device, onopen) {
     this.subscribeTestHandler = function () {
         var callback = function () {
             var data = Array.prototype.slice.call(arguments);
-            console.log('Test callback got...')
-            console.log(data)
             if (data[1] == 'subscribe') {
                 this.subscribe(data[2], callback);
             } else if (data[1] == 'unsubscribe') {
